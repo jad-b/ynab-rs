@@ -15,14 +15,14 @@ pub mod ensemble {
 
     pub fn ensemble() -> &'static Ensemble<'static> {
         static ENSEMBLE : OnceLock<Ensemble> = OnceLock::new();
-        ENSEMBLE.get_or_init(|| Ensemble {})
+        ENSEMBLE.get_or_init(|| Ensemble{})
     }
 
     pub struct Ensemble<'a> {}
 
     impl Ensemble<'_> {
         pub fn new_scenario(&self) -> &mut Scenario {
-            &mut Scenario {}
+            &mut Scenario{}
         }
     }
 
@@ -55,7 +55,4 @@ pub mod ensemble {
     }
 
     pub struct Category<'a> {}
-
 }
-
-struct Category {}
