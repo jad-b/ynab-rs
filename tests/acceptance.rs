@@ -1,3 +1,23 @@
+use std::convert::TryFrom;
+use std::env;
+
+enum AssemblyType{
+    Domain,
+    Live,
+}
+
+impl TryFrom<&str> for AssemblyType {
+    type Error = String;
+
+    fn try_from(val: &str) -> Result<Self, Self::Error> {
+        match val.to_ascii_lowercase().as_str() {
+            "domain" => Ok(Self::Domain),
+            "live" => Ok(Self::Live),
+            other => Err(format!("'{other}' isn't a supported test assembly")),
+        }
+    }
+}
+
 #[test]
 fn gets_all_categories_with_targets() {
     let scenario = assembly::assembly().new_scenario();
