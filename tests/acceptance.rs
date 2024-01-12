@@ -1,7 +1,6 @@
 #[test]
 fn gets_all_categories_with_targets() {
-    let x : usize = 0;
-    let scenario = assembly::assembly(&x).new_scenario();
+    let scenario = assembly::assembly().new_scenario();
 
     let budgeter = scenario.new_budgeter();
 
@@ -14,9 +13,9 @@ fn gets_all_categories_with_targets() {
 pub mod assembly {
     use std::sync::OnceLock;
 
-    pub fn assembly<T>(_scope: &T) -> &Assembly {
-        static assembly : OnceLock<Assembly> = OnceLock::new();
-        assembly.get_or_init(|| Assembly{})
+    pub fn assembly() -> &'static Assembly {
+        static ASSEMBLY : OnceLock<Assembly> = OnceLock::new();
+        ASSEMBLY.get_or_init(|| Assembly{})
     }
 
     pub struct Assembly { }
