@@ -1,58 +1,63 @@
 #[test]
 fn gets_all_categories_with_targets() {
-    let scenario = ensemble::ensemble().new_scenario();
+    let x : usize = 0;
+    let scenario = assembly::assembly(&x).new_scenario();
 
     let budgeter = scenario.new_budgeter();
 
     let budget = budgeter.has_budget();
     let categories = budget.categories();
 
-    let category_csv = budgeter.can_export_categories("csv");
+    let _category_csv = budgeter.can_export_categories("csv", &categories);
 }
 
-pub mod ensemble {
+pub mod assembly {
     use std::sync::OnceLock;
 
-    pub fn ensemble() -> &'static Ensemble<'static> {
-        static ENSEMBLE : OnceLock<Ensemble> = OnceLock::new();
-        ENSEMBLE.get_or_init(|| Ensemble{})
+    pub fn assembly<T>(_scope: &T) -> &Assembly {
+        static assembly : OnceLock<Assembly> = OnceLock::new();
+        assembly.get_or_init(|| Assembly{})
     }
 
-    pub struct Ensemble<'a> {}
+    pub struct Assembly { }
 
-    impl Ensemble<'_> {
-        pub fn new_scenario(&self) -> &mut Scenario {
-            &mut Scenario{}
+    impl Assembly {
+        pub fn new_scenario(&self) -> Scenario {
+            Scenario{}
         }
     }
 
-    pub struct Scenario<'a> {}
+    pub struct Scenario {}
 
-    impl Scenario<'_> {
-        pub fn new_budgeter(&self) -> &mut Budgeter {
-            &mut Budgeter{}
+    impl Scenario {
+        pub fn new_budgeter(&self) -> Budgeter {
+            Budgeter{}
         }
     }
 
-    pub struct Budgeter<'a> {}
+    pub struct Budgeter {}
 
-    impl Budgeter<'_> {
-        pub fn has_budget(&self) -> &mut Budget {
-            &mut Budget{}
+    impl Budgeter {
+        pub fn has_budget(&self) -> Budget {
+            Budget{}
         }
 
-        pub fn can_export_categories(&self, format : &'static str) -> &str {
+        pub fn can_export_categories(
+            &self,
+            _format: &'static str,
+            _categories: &Vec<Category>
+        ) -> &str {
             "category_name,target_type,target_goal"
         }
     }
 
-    pub struct Budget<'a> {}
+    pub struct Budget {}
 
-    impl Budget<'_> {
-        pub fn categories(&self) -> Vec<&Category<'_>> {
-            vec!(&mut Category{})
+    impl Budget {
+        pub fn categories(&self) -> Vec<Category> {
+            vec!(Category{})
         }
     }
 
-    pub struct Category<'a> {}
+    pub struct Category {}
 }
