@@ -1,13 +1,12 @@
 #[test]
-fn gets_all_categories_with_targets() {
+fn gets_all_goals_with_targets() {
     let scenario = assembly::assembly().new_scenario();
 
     let budgeter = scenario.new_budgeter();
 
-    let budget = budgeter.has_budget();
-    let categories = budget.categories();
+    let goals = budgeter.has_monthly_goals();
 
-    let _category_csv = budgeter.can_export_categories("csv", &categories);
+    let _category_csv = budgeter.can_export_goals("csv", &goals);
 }
 
 pub mod assembly {
@@ -68,26 +67,18 @@ pub mod assembly {
     pub struct Budgeter {}
 
     impl Budgeter {
-        pub fn has_budget(&self) -> Budget {
-            Budget{}
+        pub fn has_monthly_goals(&self) -> Vec<Goal> {
+            vec!(Goal{})
         }
 
-        pub fn can_export_categories(
+        pub fn can_export_goals(
             &self,
             _format: &'static str,
-            _categories: &Vec<Category>
+            _goals: &Vec<Goal>
         ) -> &str {
-            "category_name,target_type,target_goal"
+            "name,frequency,total_amount,monthly_allocation"
         }
     }
 
-    pub struct Budget {}
-
-    impl Budget {
-        pub fn categories(&self) -> Vec<Category> {
-            vec!(Category{})
-        }
-    }
-
-    pub struct Category {}
+    pub struct Goal {}
 }
