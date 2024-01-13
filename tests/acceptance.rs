@@ -1,3 +1,5 @@
+use assembly::{Budgeter, Scenario};
+
 #[test]
 fn gets_all_goals_with_targets() {
     let scenario = assembly::assembly().new_scenario();
@@ -6,15 +8,17 @@ fn gets_all_goals_with_targets() {
 
     let goals = budgeter.has_monthly_goals();
 
-    let _category_csv = budgeter.can_export_goals("csv", &goals);
+    let _goals_csv = budgeter.can_export_goals("csv", &goals);
 }
 
 pub mod assembly {
+    use domain::DomainScenario;
     use std::{
         convert::TryFrom,
         env,
         sync::OnceLock,
     };
+    use super::domain::Goal;
 
     const ASSEMBLY_TYPE: &str = "ASSEMBLY_TYPE";
 
@@ -51,34 +55,59 @@ pub mod assembly {
     }
 
     impl Assembly {
-        pub fn new_scenario(&self) -> Scenario {
-            Scenario{}
+        pub fn new_scenario(&self) -> impl Scenario {
+            match self.asm_type {
+                AssemblyType::Domain => DomainScenario{},
+                AssemblyType::Live => DomainScenario{},
+            }
         }
     }
 
-    pub struct Scenario {}
-
-    impl Scenario {
-        pub fn new_budgeter(&self) -> Budgeter {
-            Budgeter{}
-        }
+    pub trait Scenario {
+        fn new_budgeter(&self) -> impl Budgeter;
     }
 
-    pub struct Budgeter {}
+    pub trait Budgeter {
+        fn has_monthly_goals(&self) -> Vec<Goal>;
 
-    impl Budgeter {
-        pub fn has_monthly_goals(&self) -> Vec<Goal> {
-            vec!(Goal{})
-        }
-
-        pub fn can_export_goals(
+        fn can_export_goals(
             &self,
             _format: &'static str,
             _goals: &Vec<Goal>
-        ) -> &str {
-            "name,frequency,total_amount,monthly_allocation"
-        }
+        ) -> &str;
     }
 
+
+    pub mod domain {
+        use super::{Budgeter,Scenario};
+        use crate::domain::Goal;
+
+        pub struct DomainScenario {}
+
+        impl Scenario for DomainScenario {
+            fn new_budgeter(&self) -> impl Budgeter {
+                DomainBudgeter{}
+            }
+        }
+
+        pub struct DomainBudgeter {}
+
+        impl Budgeter for DomainBudgeter {
+            fn has_monthly_goals(&self) -> Vec<Goal> {
+                vec!(Goal{})
+            }
+
+            fn can_export_goals(
+                &self,
+                _format: &'static str,
+                _goals: &Vec<Goal>
+            ) -> &str {
+                "name,frequency,total_amount,monthly_allocation"
+            }
+        }
+    }
+}
+
+pub mod domain {
     pub struct Goal {}
 }
