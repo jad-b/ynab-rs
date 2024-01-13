@@ -1,14 +1,26 @@
 use assembly::{Budgeter, Scenario};
+use domain::{Goal, GoalFreq};
+
+
+fn example_goals() -> Vec<Goal> {
+    vec!(
+        Goal::new(
+            String::from("Groceries"),
+            GoalFreq::Monthly,
+            800,
+        )
+    )
+}
 
 #[test]
 fn gets_all_goals_with_targets() {
+    // Scenario
     let scenario = assembly::assembly().new_scenario();
-
-    let budgeter = scenario.new_budgeter();
-
-    let goals = budgeter.has_monthly_goals();
-
-    let _goals_csv = budgeter.can_export_goals("csv", &goals);
+    // Retrieve actors for roles
+    let mut budgeter = scenario.new_budgeter();
+    // Observe system behavior (test) by executing actor tasks
+    budgeter.sets_monthly_goals(example_goals());
+    let _csv = budgeter.can_export_goals(budgeter.has_goals());
 }
 
 pub mod assembly {
@@ -68,17 +80,21 @@ pub mod assembly {
     }
 
     pub trait Budgeter {
-        fn has_monthly_goals(&self) -> Vec<Goal>;
+        fn sets_monthly_goals<'a>(&'a mut self, goals: Vec<Goal>);
+
+        fn has_goals(&self) -> &[Goal];
 
         fn can_export_goals(
             &self,
-            _format: &'static str,
-            _goals: &Vec<Goal>
+            _goals: &[Goal],
         ) -> &str;
     }
 
-
     pub mod domain {
+        use std::error::Error;
+
+        use csv::Writer;
+
         use super::{Budgeter,Scenario};
         use crate::domain::Goal;
 
@@ -86,28 +102,68 @@ pub mod assembly {
 
         impl Scenario for DomainScenario {
             fn new_budgeter(&self) -> impl Budgeter {
-                DomainBudgeter{}
+                DomainBudgeter{
+                    goals: Vec::new(),
+                    csv_output: Writer::from_writer(vec![]),
+                }
             }
         }
 
-        pub struct DomainBudgeter {}
+        pub struct DomainBudgeter {
+            goals: Vec<Goal>,
+            csv_output: Writer<Vec<u8>>
+        }
 
         impl Budgeter for DomainBudgeter {
-            fn has_monthly_goals(&self) -> Vec<Goal> {
-                vec!(Goal{})
+            fn sets_monthly_goals<'a>(&'a mut self, goals: Vec<Goal>) {
+                self.goals = goals;
+            }
+
+            fn has_goals(&self) -> &[Goal] {
+                &self.goals
             }
 
             fn can_export_goals(
                 &self,
-                _format: &'static str,
-                _goals: &Vec<Goal>
-            ) -> &str {
-                "name,frequency,total_amount,monthly_allocation"
+                goals: &[Goal],
+            ) -> Result<(), impl Error> {
+                let mut wtr = csv::Writer::from_writer(self.csv_output);
+
+
+                goals.iter()
+                    .for_each(|&g| wtr.serialize(g).unwrap());
+                wtr.flush()?;
+
+                // todo| check the correct CSV was written
+                Ok(())
             }
         }
     }
 }
 
 pub mod domain {
-    pub struct Goal {}
+    use serde::Serialize;
+
+    #[derive(Debug, Serialize)]
+    pub enum GoalFreq {
+        Monthly,
+        Yearly,
+    }
+
+    #[derive(Debug, Serialize)]
+    pub struct Goal {
+        name: String,
+        frequency: GoalFreq,
+        target: usize,
+    }
+
+    impl Goal {
+        pub fn new(name: String, frequency: GoalFreq, target: usize) -> Goal {
+            Goal{
+                name,
+                frequency,
+                target,
+            }
+        }
+    }
 }
