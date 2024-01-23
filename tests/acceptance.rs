@@ -20,7 +20,7 @@ fn gets_all_goals_with_targets() {
     let mut budgeter = scenario.new_budgeter();
     // Observe system behavior (test) by executing actor tasks
     budgeter.sets_monthly_goals(example_goals());
-    let _csv = budgeter.can_export_goals(budgeter.has_goals());
+    budgeter.can_export_goals().unwrap();
 }
 
 pub mod assembly {
@@ -28,6 +28,7 @@ pub mod assembly {
     use std::{
         convert::TryFrom,
         env,
+        io,
         sync::OnceLock,
     };
     use super::domain::Goal;
@@ -84,14 +85,13 @@ pub mod assembly {
 
         fn has_goals(&self) -> &[Goal];
 
-        fn can_export_goals(
-            &self,
-            _goals: &[Goal],
-        ) -> &str;
+        fn can_export_goals(&mut self) -> io::Result<()>;
     }
 
     pub mod domain {
-        use std::error::Error;
+        use std::{
+            io,
+        };
 
         use csv::Writer;
 
@@ -123,16 +123,10 @@ pub mod assembly {
                 &self.goals
             }
 
-            fn can_export_goals(
-                &self,
-                goals: &[Goal],
-            ) -> Result<(), impl Error> {
-                let mut wtr = csv::Writer::from_writer(self.csv_output);
-
-
-                goals.iter()
-                    .for_each(|&g| wtr.serialize(g).unwrap());
-                wtr.flush()?;
+            fn can_export_goals(&mut self) -> io::Result<()> {
+                self.goals.iter()
+                    .for_each(|g| self.csv_output.serialize(g).unwrap());
+                self.csv_output.flush()?;
 
                 // todo| check the correct CSV was written
                 Ok(())
