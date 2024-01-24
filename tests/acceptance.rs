@@ -20,7 +20,7 @@ fn gets_all_goals_with_targets() {
     let mut budgeter = scenario.new_budgeter();
     // Observe system behavior (test) by executing actor tasks
     budgeter.sets_monthly_goals(example_goals());
-    budgeter.can_export_goals().unwrap();
+    budgeter.can_export_goals();
 }
 
 pub mod assembly {
@@ -28,7 +28,6 @@ pub mod assembly {
     use std::{
         convert::TryFrom,
         env,
-        io,
         sync::OnceLock,
     };
     use super::domain::Goal;
@@ -85,14 +84,10 @@ pub mod assembly {
 
         fn has_goals(&self) -> &[Goal];
 
-        fn can_export_goals(&mut self) -> io::Result<()>;
+        fn can_export_goals(&mut self);
     }
 
     pub mod domain {
-        use std::{
-            io,
-        };
-
         use csv::Writer;
 
         use super::{Budgeter,Scenario};
@@ -123,13 +118,17 @@ pub mod assembly {
                 &self.goals
             }
 
-            fn can_export_goals(&mut self) -> io::Result<()> {
+            fn can_export_goals(&mut self) {
                 self.goals.iter()
                     .for_each(|g| self.csv_output.serialize(g).unwrap());
-                self.csv_output.flush()?;
+                self.csv_output.flush().unwrap();
 
-                // todo| check the correct CSV was written
-                Ok(())
+                // next| check the correct CSV was written
+                let data = String::from_utf8(self.csv_output.get_ref().to_vec()).unwrap();
+                let exp_data = "\
+                    name,frequency,target\n\
+                    Groceries,Monthly,800\n";
+                assert_eq!(&data, exp_data);
             }
         }
     }
