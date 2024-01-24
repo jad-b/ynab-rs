@@ -5,10 +5,25 @@ use domain::{Goal, GoalFreq};
 fn example_goals() -> Vec<Goal> {
     vec!(
         Goal::new(
+            String::from("Mortgage"),
+            GoalFreq::Monthly,
+            2545,
+        ),
+        Goal::new(
             String::from("Groceries"),
             GoalFreq::Monthly,
-            800,
-        )
+            1200,
+        ),
+        Goal::new(
+            String::from("Spotify"),
+            GoalFreq::Monthly,
+            16,
+        ),
+        Goal::new(
+            String::from("Tax Professional"),
+            GoalFreq::Yearly,
+            730,
+        ),
     )
 }
 
@@ -127,7 +142,10 @@ pub mod assembly {
                 let data = String::from_utf8(self.csv_output.get_ref().to_vec()).unwrap();
                 let exp_data = "\
                     name,frequency,target\n\
-                    Groceries,Monthly,800\n";
+                    Mortgage,Monthly,2545\n\
+                    Groceries,Monthly,1200\n\
+                    Spotify,Monthly,16\n\
+                    Tax Professional,Yearly,730\n";
                 assert_eq!(&data, exp_data);
             }
         }
@@ -147,6 +165,7 @@ pub mod domain {
     pub struct Goal {
         name: String,
         frequency: GoalFreq,
+        // todo| currency/decimal support
         target: usize,
     }
 
