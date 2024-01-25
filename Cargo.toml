@@ -5,6 +5,14 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "ynab-rs"
+path = "src/main.rs"
+
+[lib]
+name = "ynabrs"
+path = "src/lib.rs"
+
 [dependencies]
 csv = "1.3.0"
 serde = { version = "1.0", features = ["derive"] }

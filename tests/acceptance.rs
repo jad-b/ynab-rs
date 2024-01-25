@@ -1,5 +1,5 @@
 use assembly::{Budgeter, Scenario};
-use domain::{Goal, GoalFreq};
+use ynabrs::domain::{Goal, GoalFreq};
 
 
 fn example_goals() -> Vec<Goal> {
@@ -45,7 +45,7 @@ pub mod assembly {
         env,
         sync::OnceLock,
     };
-    use super::domain::Goal;
+    use ynabrs::domain::Goal;
 
     const ASSEMBLY_TYPE: &str = "ASSEMBLY_TYPE";
 
@@ -106,7 +106,7 @@ pub mod assembly {
         use csv::Writer;
 
         use super::{Budgeter,Scenario};
-        use crate::domain::Goal;
+        use ynabrs::domain::Goal;
 
         pub struct DomainScenario {}
 
@@ -138,7 +138,6 @@ pub mod assembly {
                     .for_each(|g| self.csv_output.serialize(g).unwrap());
                 self.csv_output.flush().unwrap();
 
-                // next| check the correct CSV was written
                 let data = String::from_utf8(self.csv_output.get_ref().to_vec()).unwrap();
                 let exp_data = "\
                     name,frequency,target\n\
@@ -147,34 +146,6 @@ pub mod assembly {
                     Spotify,Monthly,16\n\
                     Tax Professional,Yearly,730\n";
                 assert_eq!(&data, exp_data);
-            }
-        }
-    }
-}
-
-pub mod domain {
-    use serde::Serialize;
-
-    #[derive(Debug, Serialize)]
-    pub enum GoalFreq {
-        Monthly,
-        Yearly,
-    }
-
-    #[derive(Debug, Serialize)]
-    pub struct Goal {
-        name: String,
-        frequency: GoalFreq,
-        // todo| currency/decimal support
-        target: usize,
-    }
-
-    impl Goal {
-        pub fn new(name: String, frequency: GoalFreq, target: usize) -> Goal {
-            Goal{
-                name,
-                frequency,
-                target,
             }
         }
     }
